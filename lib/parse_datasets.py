@@ -18,9 +18,9 @@ from torch.utils.data import DataLoader
 from mujoco_physics import HopperPhysics
 from physionet import PhysioNet, variable_time_collate_fn, get_data_min_max
 from person_activity import PersonActivity, variable_time_collate_fn_activity
-
 from sklearn import model_selection
 import random
+from camh import Simulated
 
 #####################################################################################################
 def parse_datasets(args, device):
@@ -95,8 +95,42 @@ def parse_datasets(args, device):
 					"n_train_batches": len(train_dataloader),
 					"n_test_batches": len(test_dataloader)}
 		return data_objects
-
 	##################################################################
+	# camh dataset
+	if dataset_name == "camh":
+		data_objects = Simulated('data/camh/simdata_long_n100.csv', quantization=args.quantization,
+								 n_samples=min(10000, args.n),
+								 device=device)
+		total_dataset = data_objects.processing()
+		train_data, test_data = model_selection.train_test_split(total_dataset, train_size=0.8,
+																 random_state=42, shuffle=True)
+		record_id, tt, vals, mask, labels = train_data[0]
+		n_samples = len(total_dataset)
+		input_dim = vals.size(-1)
+
+		batch_size = min(min(len(train_data), args.batch_size), args.n)
+		data_min, data_max = get_data_min_max(total_dataset)
+
+		train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=False,
+									  collate_fn=lambda batch: variable_time_collate_fn(batch, args, device,
+																						data_type="train",
+																						data_min=data_min,
+																						data_max=data_max))
+		test_dataloader = DataLoader(test_data, batch_size=n_samples, shuffle=False,
+									 collate_fn=lambda batch: variable_time_collate_fn(batch, args, device,
+																					   data_type="test",
+																					   data_min=data_min,
+																					   data_max=data_max))
+
+		data_objects = {"dataset_obj": data_objects,
+						"train_dataloader": utils.inf_generator(train_dataloader),
+						"test_dataloader": utils.inf_generator(test_dataloader),
+						"input_dim": input_dim,
+						"n_train_batches": len(train_dataloader),
+						"n_test_batches": len(test_dataloader)}
+		return data_objects
+
+##################################################################
 	# Physionet dataset
 
 	if dataset_name == "physionet":

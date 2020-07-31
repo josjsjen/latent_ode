@@ -15,6 +15,8 @@ class Simulated(object):
 
     def processing(self):
         df = self.csv
+        df = df.drop(['time'], axis=1)
+
         self.dataset_obj = []
 
         max_timestamps = 0
@@ -22,10 +24,11 @@ class Simulated(object):
             if df.loc[df.id == id].iloc[:, 1].shape[0] > max_timestamps:
                 max_timestamps = df.loc[df.id == id].iloc[:, 1].shape[0]
 
-        for id in df.id.values:
-            patient_id = id
+        total_unique_ids = df['id'].unique()
+        for i in total_unique_ids:
+            patient_id = i
             tt = np.arange(max_timestamps)
-            vals = df.loc[df.id == 'sub1'].iloc[:, 1:].values
+            vals = df.loc[df.id == i].iloc[:, 2:].values
             if max_timestamps - vals.shape[0] >0:
                 dup = np.stack([vals[-1] for _ in range(max_timestamps - vals.shape[0])], axis=0)
                 vals = np.vstack((vals, dup))
@@ -35,6 +38,9 @@ class Simulated(object):
             masks[np.isnan(masks)] = 0
 
             labels=np.zeros(1)
+
+            # todo: confirm if this is the right way to impute missingness
+            vals = np.nan_to_num(vals, nan=0)
 
             tt = torch.tensor(tt).to("cpu").to(dtype=torch.float32)
             vals = torch.tensor(vals).to("cpu").to(dtype=torch.float32)
