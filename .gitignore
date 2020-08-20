@@ -4,4 +4,3 @@ data/physionet/PhysioNet/raw/
 logs/
 experiments/
 __pycache__/
-data/camh/simdata_long_n3000.csv
