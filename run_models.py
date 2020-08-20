@@ -39,10 +39,10 @@ from lib.utils import compute_loss_all_batches
 
 # Generative model for noisy data based on ODE
 parser = argparse.ArgumentParser('Latent ODE')
-parser.add_argument('-n',  type=int, default=100, help="Size of the dataset")
+parser.add_argument('-n',  type=int, default=3000, help="Size of the dataset")
 parser.add_argument('--niters', type=int, default=1)
 parser.add_argument('--lr',  type=float, default=1e-2, help="Starting learning rate.")
-parser.add_argument('-b', '--batch-size', type=int, default=40)
+parser.add_argument('-b', '--batch-size', type=int, default=100)
 parser.add_argument('--viz', action='store_true', help="Show plots while training")
 
 parser.add_argument('--save', type=str, default='experiments/', help="Path for save checkpoints")
@@ -305,6 +305,7 @@ if __name__ == '__main__':
 
 				if "ce_loss" in test_res:
 					logger.info("CE loss: {}".format(test_res["ce_loss"]))
+
 
 			torch.save({
 				'args': args,

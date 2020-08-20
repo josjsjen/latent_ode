@@ -235,7 +235,6 @@ def compute_mse(mu, data, mask = None):
 
 
 
-
 def compute_poisson_proc_likelihood(truth, pred_y, info, mask = None):
 	# Compute Poisson likelihood
 	# https://math.stackexchange.com/questions/344487/log-likelihood-of-a-realization-of-a-poisson-process

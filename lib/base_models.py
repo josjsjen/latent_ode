@@ -170,7 +170,8 @@ class Baseline(nn.Module):
 
 		if batch_dict["labels"] is not None and self.use_binary_classif:
 			results["label_predictions"] = info["label_predictions"].detach()
-		return results
+		else:
+			return results
 
 
 

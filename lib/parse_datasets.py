@@ -98,7 +98,7 @@ def parse_datasets(args, device):
 	##################################################################
 	# camh dataset
 	if dataset_name == "camh":
-		data_objects = Simulated('data/camh/simdata_long_n100.csv', quantization=args.quantization,
+		data_objects = Simulated('data/camh/simdata_long_n3000.csv', quantization=args.quantization,
 								 n_samples=min(10000, args.n),
 								 device=device)
 		total_dataset = data_objects.processing()
