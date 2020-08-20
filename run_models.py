@@ -36,6 +36,7 @@ from mujoco_physics import HopperPhysics
 
 from lib.utils import compute_loss_all_batches
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # Generative model for noisy data based on ODE
 parser = argparse.ArgumentParser('Latent ODE')
