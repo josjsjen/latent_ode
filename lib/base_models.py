@@ -98,7 +98,7 @@ class Baseline(nn.Module):
 
 
 	def compute_all_losses(self, batch_dict,
-		n_tp_to_sample = None, n_traj_samples = 1, kl_coef = 1.):
+		n_tp_to_sample = None, n_traj_samples = 1, kl_coef = 1.,inference_flag=False):
 
 		# Condition on subsampled points
 		# Make predictions for all the points
@@ -168,10 +168,13 @@ class Baseline(nn.Module):
 		results["kl_first_p"] =  0.
 		results["std_first_p"] = 0.
 
-		if batch_dict["labels"] is not None and self.use_binary_classif:
-			results["label_predictions"] = info["label_predictions"].detach()
+		if not inference_flag:
+			if batch_dict["labels"] is not None and self.use_binary_classif:
+				results["label_predictions"] = info["label_predictions"].detach()
+			else:
+				return results
 		else:
-			return results
+			return results, pred_x, batch_dict["data_to_predict"]
 
 
 

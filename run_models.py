@@ -34,14 +34,14 @@ from lib.ode_func import ODEFunc, ODEFunc_w_Poisson
 from lib.diffeq_solver import DiffeqSolver
 from mujoco_physics import HopperPhysics
 
-from lib.utils import compute_loss_all_batches
+from lib.utils import compute_loss_all_batches, get_next_batch
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # Generative model for noisy data based on ODE
 parser = argparse.ArgumentParser('Latent ODE')
 parser.add_argument('-n',  type=int, default=3000, help="Size of the dataset")
-parser.add_argument('--niters', type=int, default=1)
+parser.add_argument('--niters', type=int, default=10)
 parser.add_argument('--lr',  type=float, default=1e-2, help="Starting learning rate.")
 parser.add_argument('-b', '--batch-size', type=int, default=100)
 parser.add_argument('--viz', action='store_true', help="Show plots while training")
@@ -330,4 +330,31 @@ if __name__ == '__main__':
 		'args': args,
 		'state_dict': model.state_dict(),
 	}, ckpt_path)
+
+	# load model for inference
+	model = Classic_RNN(input_dim, args.latents, device,
+			concat_mask = True, obsrv_std = obsrv_std,
+			n_units = args.units,
+			use_binary_classif = args.classif,
+			classif_per_tp = classif_per_tp,
+			linear_classifier = args.linear_classif,
+			input_space_decay = args.input_decay,
+			cell = args.rnn_cell,
+			n_labels = n_labels,
+			train_classif_w_reconstr = (args.dataset == "physionet")
+			).to(device)
+
+	model.load_state_dict(torch.load(ckpt_path)['state_dict'])
+
+	data_inference = get_next_batch(data_obj["test_dataloader"])
+	inf_res, pred, data = model.compute_all_losses(data_inference,
+			n_traj_samples = 3, kl_coef = kl_coef,inference_flag=True)
+
+	print("inf_res:",inf_res)
+	print(torch.squeeze(pred).shape)
+	print(data.shape)
+	# print(torch.cat((torch.squeeze(pred), data), 0).shape)
+
+
+
 
