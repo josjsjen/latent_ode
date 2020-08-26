@@ -4,3 +4,4 @@ data/physionet/PhysioNet/raw/
 logs/
 experiments/
 __pycache__/
+results/

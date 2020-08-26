@@ -350,10 +350,33 @@ if __name__ == '__main__':
 	inf_res, pred, data = model.compute_all_losses(data_inference,
 			n_traj_samples = 3, kl_coef = kl_coef,inference_flag=True)
 
-	print("inf_res:",inf_res)
-	print(torch.squeeze(pred).shape)
-	print(data.shape)
-	# print(torch.cat((torch.squeeze(pred), data), 0).shape)
+	# write test data to dataframe
+	data_df = pd.DataFrame(columns=['msex', 'geno1', 'geno2', 'geno3', 'img1', 'img2', 'img3', 'cog1', 'cog2',
+							'cog3', 'ses', 'id', 'period'])
+
+	for i in range(data.shape[0]):
+		data_df_i = pd.DataFrame(data=data[i, :, :].numpy(),
+							   columns=['msex', 'geno1', 'geno2', 'geno3', 'img1', 'img2', 'img3', 'cog1', 'cog2',
+										'cog3', 'ses'])
+		data_df_i['id'] = "sub" + str(i)
+		data_df_i['period'] = np.arange(data.shape[1])
+		data_df = data_df.append(data_df_i)
+
+	data_df.to_csv(f'results/{str(experimentID)}_test_data.csv', index=False)
+
+	# write prediction data to dataframe
+	pred_df = pd.DataFrame(columns=['msex', 'geno1', 'geno2', 'geno3', 'img1', 'img2', 'img3', 'cog1', 'cog2',
+									'cog3', 'ses', 'id', 'period'])
+	pred_data = torch.squeeze(pred).detach().numpy()
+	for i in range(pred_data.shape[0]):
+		pred_df_i = pd.DataFrame(data=pred_data[i, :, :],
+								 columns=['msex', 'geno1', 'geno2', 'geno3', 'img1', 'img2', 'img3', 'cog1', 'cog2',
+										  'cog3', 'ses'])
+		pred_df_i['id'] = "sub" + str(i)
+		pred_df_i['period'] = np.arange(pred_data.shape[1])
+		pred_df = pred_df.append(pred_df_i)
+
+	pred_df.to_csv(f'results/{str(experimentID)}_prediction_data.csv', index=False)
 
 
 
